@@ -1,42 +1,26 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 export default function Dashboard() {
-  const [user, setUser] = useState(null);
+  // Bring in user data and auth status from context
+  const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // 1. Check for token to protect the route
-    const token = localStorage.getItem('token');
-    if (!token) {
-      navigate('/'); // Kick them out if no token exists
-      return;
+    // Protect the route: if not authenticated, kick them to login
+    if (!isAuthenticated) {
+      navigate('/');
     }
+  }, [isAuthenticated, navigate]);
 
-    // 2. Retrieve persisted user info
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-  }, [navigate]);
-
-  const handleLogout = () => {
-    // Clear session storage
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    // Redirect to login
-    navigate('/');
-  };
-
-  if (!user) return <p>Loading...</p>;
+  if (!user) return null;
 
   return (
     <div style={{ padding: '20px', textAlign: 'center' }}>
-      <h2>Welcome to your Dashboard!</h2>
-      <p>Logged in as: <strong>{user.email}</strong></p>
-      <button onClick={handleLogout} style={{ marginTop: '20px', padding: '10px 20px' }}>
-        Logout
-      </button>
+      <h2>Dashboard</h2>
+      <p>Welcome to the protected area!</p>
+      <p>Your stored email is: <strong>{user.email}</strong></p>
     </div>
   );
 }
