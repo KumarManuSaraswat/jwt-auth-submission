@@ -56,9 +56,10 @@ export const AuthProvider = ({ children }) => {
   const isAuthenticated = !!user;
 
   return (
-    <AuthContext.Provider value={{ user, token, isAuthenticated, login, logout }}>
-      {/* Don't render children until we've checked localStorage */}
-      {!loading && children} 
+    // 1. Add `loading` to the value object
+    <AuthContext.Provider value={{ user, token, isAuthenticated, login, logout, loading }}>
+      {/* 2. Render children immediately so our ProtectedRoute can show the loading text */}
+      {children}
     </AuthContext.Provider>
   );
 };
