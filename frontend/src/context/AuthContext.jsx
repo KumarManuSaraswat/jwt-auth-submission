@@ -1,4 +1,5 @@
 import { createContext, useState, useEffect, useContext } from 'react';
+import api from '../utils/api';
 
 // 1. Create the Context
 const AuthContext = createContext();
@@ -23,25 +24,22 @@ export const AuthProvider = ({ children }) => {
 
   // Centralized Login Logic
   const login = async (email, password) => {
-    const response = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
-    });
-    
-    const data = await response.json();
-    
-    if (!response.ok) {
-      throw new Error(data.message || 'Login failed');
-    }
+    try {
+      // Look how clean this is now! No headers, no JSON.stringify
+      const response = await api.post('/login', { email, password });
+      
+      // Axios automatically parses JSON into the `.data` property
+      const data = response.data; 
 
-    // Persist data
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('user', JSON.stringify(data.user));
-    
-    // Update global state
-    setToken(data.token);
-    setUser(data.user);
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      
+      setToken(data.token);
+      setUser(data.user);
+    } catch (error) {
+      // Axios puts server error messages inside error.response.data
+      throw new Error(error.response?.data?.message || 'Login failed');
+    }
   };
 
   // Centralized Logout Logic
